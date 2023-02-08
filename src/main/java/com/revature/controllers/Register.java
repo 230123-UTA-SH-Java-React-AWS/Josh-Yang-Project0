@@ -9,6 +9,7 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+import com.revature.models.Employee;
 import com.revature.service.Service;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -28,8 +29,8 @@ public class Register implements HttpHandler {
                 postRequest(exchange);
                 break;
             // case "GET":
-                // getRequest(exchange);
-                // break;
+            //     getRequest(exchange);
+            //     break;
             default:
                 String invalidVerb = "HTTP Verb not supported";
 
@@ -67,6 +68,12 @@ public class Register implements HttpHandler {
         String registerMessage = service.registration(convertToString.toString());
 
         exchange.sendResponseHeaders(200, registerMessage.getBytes().length);
+
+        // if (service.registration(registerMessage).equals("You've successfully registered an account.")) {
+        //     exchange.sendResponseHeaders(404, registerMessage.getBytes().length);
+        // } else {
+        //     exchange.sendResponseHeaders(200, registerMessage.getBytes().length);
+        // }
 
         OutputStream os = exchange.getResponseBody();
         os.write(registerMessage.getBytes());

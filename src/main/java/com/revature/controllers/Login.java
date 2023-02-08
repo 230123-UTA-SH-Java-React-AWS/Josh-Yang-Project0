@@ -64,11 +64,13 @@ public class Login implements HttpHandler {
         }
 
         // However, if an employee's information was indeed valid
-        if (service.employeeLogin(convertToString.toString()) == true) {
+        if (service.employeeLogin(convertToString.toString()) != true) {
             // Then change the loginMessage to tell the user they've successfully logged in
+            exchange.sendResponseHeaders(404, loginMessage.getBytes().length);
+        } else {
             loginMessage = "You've successfully logged in.";
+            exchange.sendResponseHeaders(200, loginMessage.getBytes().length);
         }
-        exchange.sendResponseHeaders(200, loginMessage.getBytes().length);
 
         // Using OutputStream to send a response
         OutputStream os = exchange.getResponseBody();
