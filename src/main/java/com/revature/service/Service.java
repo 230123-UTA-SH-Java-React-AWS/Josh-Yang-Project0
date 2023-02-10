@@ -27,15 +27,15 @@ public class Service {
      * 
     */
     // Registering an employee
-    public String registration(String employeeJson) throws JsonParseException, JsonMappingException, IOException {
+    public String updateTicketStatus(String updatedTicketJson) throws JsonParseException, JsonMappingException, IOException {
         // converts json string to an object
-        Employee employee = mapper.readValue(employeeJson, Employee.class);
+        Tickets ticket = mapper.readValue(updatedTicketJson, Tickets.class);
         
         // stores the returned string message into registered variable
-        String registered = repo.registerEmployee(employee);
+        String newTicketStatus = repo.updateTicketStatus(ticket);
 
         // return the registered message
-        return registered;
+        return newTicketStatus;
     }
     
     /* 
@@ -68,6 +68,17 @@ public class Service {
         result = repo.isManager(isManager);
         
         return result;
+    }
+
+    public String registration(String employeeJson) throws JsonParseException, JsonMappingException, IOException {
+        // converts json string to an object
+        Employee employee = mapper.readValue(employeeJson, Employee.class);
+        
+        // stores the returned string message into registered variable
+        String registered = repo.registerEmployee(employee);
+
+        // return the registered message
+        return registered;
     }
 
     /* 

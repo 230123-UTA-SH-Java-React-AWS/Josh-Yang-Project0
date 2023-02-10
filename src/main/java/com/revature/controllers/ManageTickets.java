@@ -25,9 +25,6 @@ public class ManageTickets implements HttpHandler {
         String verb = exchange.getRequestMethod();
 
         switch (verb) {
-            case "GET":
-                getRequest(exchange);
-                break;
             case "PUT":
                 putRequest(exchange);
             default:
@@ -43,27 +40,6 @@ public class ManageTickets implements HttpHandler {
         }
     }
 
-    /* 
-     *
-     * Successful 
-     * 
-    */
-    // Viewing all the tickets
-    public void getRequest(HttpExchange exchange) throws IOException {
-        String jsonCurrentList = service.getAllTickets();
-
-        exchange.sendResponseHeaders(200, jsonCurrentList.getBytes().length);
-
-        OutputStream os = exchange.getResponseBody();
-        os.write(jsonCurrentList.getBytes());
-        os.close();
-    }
-
-    // {
-//     "ticketId": 26,
-//     "email": "leo@gmail.com",
-//     "status": "approved"
-// }
     /*
      *
      * Able to filter the status, but not the email part yet 
@@ -88,25 +64,25 @@ public class ManageTickets implements HttpHandler {
                 convertToString.append((char) c);
             }
         }
-        String jsonCurrentList = "";
+        // String jsonCurrentList = "";
 
-        String status = convertToString.toString().toLowerCase();
+        String ticketUpdated = service.updateTicketStatus(convertToString.toString());
 
-        if (status.contains("pending")) {
-            jsonCurrentList = service.pendingTickets();
+        // if (status.contains("pending")) {
+        //     jsonCurrentList = service.pendingTickets();
             
-        } else if (status.contains("approved")) {
-            jsonCurrentList = service.approvedTickets();
+        // } else if (status.contains("approved")) {
+        //     jsonCurrentList = service.approvedTickets();
 
-        } else if (status.contains("denied")) {
-            jsonCurrentList = service.deniedTickets();
+        // } else if (status.contains("denied")) {
+        //     jsonCurrentList = service.deniedTickets();
 
-        }
+        // }
 
-        exchange.sendResponseHeaders(200, jsonCurrentList.getBytes().length);
+        exchange.sendResponseHeaders(200, ticketUpdated.getBytes().length);
 
         OutputStream os = exchange.getResponseBody();
-        os.write(jsonCurrentList.getBytes());
+        os.write(ticketUpdated.getBytes());
         os.close();
     }
 }

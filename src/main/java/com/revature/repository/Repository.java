@@ -167,6 +167,7 @@ public class Repository {
         try (Connection con = ConnectionUtil.getConnection()) {
             Statement stmt = con.createStatement();
 
+            // The object that will represent the result
             ResultSet rs = stmt.executeQuery("SELECT * FROM tickets");
 
             while (rs.next()) {
@@ -199,8 +200,10 @@ public class Repository {
         try (Connection con = ConnectionUtil.getConnection()) {
             Statement stmt = con.createStatement();
 
+            // The object that will represent the result
             ResultSet rs = stmt.executeQuery("SELECT * FROM tickets WHERE status = 'pending'");
 
+            // Checking each result
             while (rs.next()) {
                 Tickets someTickets = new Tickets();
 
@@ -231,8 +234,10 @@ public class Repository {
         try (Connection con = ConnectionUtil.getConnection()) {
             Statement stmt = con.createStatement();
 
+            // The object that will represent the result
             ResultSet rs = stmt.executeQuery("SELECT * FROM tickets WHERE status = 'approved'");
 
+            // Checking each result
             while (rs.next()) {
                 Tickets someTickets = new Tickets();
 
@@ -263,8 +268,10 @@ public class Repository {
         try (Connection con = ConnectionUtil.getConnection()) {
             Statement stmt = con.createStatement();
 
+            // The object that will represent the result
             ResultSet rs = stmt.executeQuery("SELECT * FROM tickets WHERE status = 'denied'");
 
+            // Checking each result
             while (rs.next()) {
                 Tickets someTickets = new Tickets();
 
@@ -325,20 +332,28 @@ public class Repository {
 
     /*
      * 
-     * Need to implement
+     * Works for now
      * 
     */
-    // public String changeTicketStatus() {
-    //     try (Connection con = ConnectionUtil.getConnection()) {
-    //         PreparedStatement prstmt = con.prepareStatement("update tickets set status = '?' where ticket_id = ? and status = 'PENDING'");
+    public String updateTicketStatus(Tickets ticket) {
+        Employee employee = new Employee();
+        
+        if (!isManager(employee)) {
+            try (Connection con = ConnectionUtil.getConnection()) {
+                PreparedStatement prstmt = con.prepareStatement("UPDATE tickets SET status = ? WHERE ticket_id = ? AND status = 'approved'");
+    
+                prstmt.setString(1, ticket.getStatus());
+                prstmt.setInt(2, ticket.getTicketId());
+    
+                prstmt.execute();
 
-    //         prstmt.setString(1, ticket.getStatus());
-    //         prstmt.setInt(2, ticket.getTicketId());
-
-    //         prstmt.execute();
-    //     } catch (Exception e) {
-    //         e.printStackTrace();
-    //     }
-    //     return null;
-    // }
+                // if (ticket.getStatus().equals("denied") || ticket.getStatus().equals("approved")) {
+                //     return "You cannot alter the tickets that have been altered.";
+                // }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return "You've updated the ticket.";
+    }
 }
