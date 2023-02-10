@@ -9,12 +9,13 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+import com.revature.models.Tickets;
 import com.revature.service.Service;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 // This class is where we will handle the HTTP request for logging in
-public class Login implements HttpHandler {
+public class ManagerSpace implements HttpHandler {
     // Field
     private final Service service = new Service();
 
@@ -27,6 +28,11 @@ public class Login implements HttpHandler {
             case "POST":
                 postRequest(exchange);
                 break;
+            case "GET":
+                getRequest(exchange);
+                break;
+            case "PUT":
+                putRequest(exchange);
             default:
                 String invalidVerb = "HTTP Verb not supported";
 
@@ -38,6 +44,22 @@ public class Login implements HttpHandler {
                 os.close();
                 break;
         }
+    }
+
+    /* 
+     *
+     * Successful 
+     * 
+    */
+    // Viewing all the tickets
+    public void getRequest(HttpExchange exchange) throws IOException {
+        String jsonCurrentList = service.getAllTickets();
+
+        exchange.sendResponseHeaders(200, jsonCurrentList.getBytes().length);
+
+        OutputStream os = exchange.getResponseBody();
+        os.write(jsonCurrentList.getBytes());
+        os.close();
     }
 
     /* 
@@ -65,20 +87,71 @@ public class Login implements HttpHandler {
             }
         }
         // A message that tells the user that their information is invalid
-        String loginMessage = "Invalid login information. Please enter the correct credentials.";
+        String loginMessage = "Invalid information.\nPlease enter the correct credentials.";
 
         // However, if an employee's information was indeed valid
-        if (service.employeeLogin(convertToString.toString()) != true) {
+        if (service.managerLogin(convertToString.toString()) != true) {
             // Then change the loginMessage to tell the user they've successfully logged in
             exchange.sendResponseHeaders(404, loginMessage.getBytes().length);
         } else {
-            loginMessage = "You've successfully logged in.";
+            loginMessage = "You've successfully logged in. Welcome to the manager space.";
             exchange.sendResponseHeaders(200, loginMessage.getBytes().length);
         }
 
         // Using OutputStream to send a response
         OutputStream os = exchange.getResponseBody();
         os.write(loginMessage.getBytes());
+        os.close();
+    }
+
+    // {
+//     "ticketId": 26,
+//     "email": "leo@gmail.com",
+//     "status": "approved"
+// }
+    /* 
+     *
+     * Able to filter the status, but not the email part yet 
+     * 
+    */
+    // Filtering out the tickets by their current status
+    public void putRequest(HttpExchange exchange) throws IOException {
+        // InputStream is not a String; it has a bunch of bytes
+        // Retrieving a body request
+        InputStream is = exchange.getRequestBody();
+
+        // Creating our StringBuilder to convert our InputStream into a String later on
+        StringBuilder convertToString = new StringBuilder();
+        
+        // Convert the binaries into letters
+        try (Reader reader = new BufferedReader(new InputStreamReader(is, Charset.forName(StandardCharsets.UTF_8.name())))) {
+            int c = 0;
+
+            // then read each letters until there is no more left, which .read() method will produce a -1
+            while ((c = reader.read()) != -1) {
+                // while reading each letters, add them into convertedToString
+                convertToString.append((char) c);
+            }
+        }
+        String jsonCurrentList = "";
+
+        String status = convertToString.toString().toLowerCase();
+
+        if (status.contains("pending")) {
+            jsonCurrentList = service.pendingTickets();
+            
+        } else if (status.contains("approved")) {
+            jsonCurrentList = service.approvedTickets();
+
+        } else if (status.contains("denied")) {
+            jsonCurrentList = service.deniedTickets();
+
+        }
+
+        exchange.sendResponseHeaders(200, jsonCurrentList.getBytes().length);
+
+        OutputStream os = exchange.getResponseBody();
+        os.write(jsonCurrentList.getBytes());
         os.close();
     }
 }

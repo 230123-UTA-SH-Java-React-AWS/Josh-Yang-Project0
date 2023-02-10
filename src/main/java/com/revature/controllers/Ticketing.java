@@ -14,7 +14,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 // This class is where we will handle the HTTP request for logging in
-public class Login implements HttpHandler {
+public class Ticketing implements HttpHandler {
     // Field
     private final Service service = new Service();
 
@@ -27,6 +27,9 @@ public class Login implements HttpHandler {
             case "POST":
                 postRequest(exchange);
                 break;
+            // case "GET":
+            //     // getRequest(exchange);
+            //     // break;
             default:
                 String invalidVerb = "HTTP Verb not supported";
 
@@ -42,10 +45,10 @@ public class Login implements HttpHandler {
 
     /* 
      *
-     * Successful login
+     * Successful 
      * 
     */
-    // Login
+    // Submitting a ticket
     public void postRequest(HttpExchange exchange) throws IOException {
         // InputStream is not a String; it has a bunch of bytes
         // Retrieving a body request
@@ -65,20 +68,17 @@ public class Login implements HttpHandler {
             }
         }
         // A message that tells the user that their information is invalid
-        String loginMessage = "Invalid login information. Please enter the correct credentials.";
+        String submission = service.submitTicket(convertToString.toString());
 
-        // However, if an employee's information was indeed valid
-        if (service.employeeLogin(convertToString.toString()) != true) {
-            // Then change the loginMessage to tell the user they've successfully logged in
-            exchange.sendResponseHeaders(404, loginMessage.getBytes().length);
+        if (submission.equals("Please enter your email.") || submission.equals("Please enter a description.") || submission.equals("Please enter an amount above 0.") || submission.equals("Please enter a description and an amount above 0.") || submission.equals("Invalid email. Please use your registered email.")) {
+            exchange.sendResponseHeaders(404, submission.getBytes().length);
         } else {
-            loginMessage = "You've successfully logged in.";
-            exchange.sendResponseHeaders(200, loginMessage.getBytes().length);
+            exchange.sendResponseHeaders(200, submission.getBytes().length);
         }
 
         // Using OutputStream to send a response
         OutputStream os = exchange.getResponseBody();
-        os.write(loginMessage.getBytes());
+        os.write(submission.getBytes());
         os.close();
     }
 }

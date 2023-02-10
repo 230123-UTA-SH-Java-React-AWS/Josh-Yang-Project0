@@ -9,7 +9,6 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-import com.revature.models.Employee;
 import com.revature.service.Service;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -28,9 +27,6 @@ public class Register implements HttpHandler {
             case "POST":
                 postRequest(exchange);
                 break;
-            // case "GET":
-            //     getRequest(exchange);
-            //     break;
             default:
                 String invalidVerb = "HTTP Verb not supported";
 
@@ -44,7 +40,12 @@ public class Register implements HttpHandler {
         }
     }
 
-    // Register
+    /* 
+     *
+     * Successful registration
+     * 
+    */
+    // Registering an account
     public void postRequest(HttpExchange exchange) throws IOException {
         // InputStream is not a String; it has a bunch of bytes
         // Retrieving a body request
@@ -67,9 +68,11 @@ public class Register implements HttpHandler {
         // Or the email they've entered had already been used
         String registerMessage = service.registration(convertToString.toString());
 
+        // Status code, along with our message
         exchange.sendResponseHeaders(200, registerMessage.getBytes().length);
 
-        // if (service.registration(registerMessage).equals("You've successfully registered an account.")) {
+        // 
+        // if (service.registration(registerMessage).equals("This email has already been used. Please try a different email.")) {
         //     exchange.sendResponseHeaders(404, registerMessage.getBytes().length);
         // } else {
         //     exchange.sendResponseHeaders(200, registerMessage.getBytes().length);
@@ -79,15 +82,4 @@ public class Register implements HttpHandler {
         os.write(registerMessage.getBytes());
         os.close();
     }
-
-    // // Retrieve all employees
-    // public void getRequest(HttpExchange exchange) throws IOException {
-    //     String jsonCurrentList = service.getAllEmployees();
-
-    //     exchange.sendResponseHeaders(200, jsonCurrentList.getBytes().length);
-
-    //     OutputStream os = exchange.getResponseBody();
-    //     os.write(jsonCurrentList.getBytes());
-    //     os.close();
-    // }
 }

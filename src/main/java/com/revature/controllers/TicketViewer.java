@@ -8,13 +8,15 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
+import com.revature.models.Tickets;
 import com.revature.service.Service;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 // This class is where we will handle the HTTP request for logging in
-public class Login implements HttpHandler {
+public class TicketViewer implements HttpHandler {
     // Field
     private final Service service = new Service();
 
@@ -24,9 +26,11 @@ public class Login implements HttpHandler {
         String verb = exchange.getRequestMethod();
 
         switch (verb) {
-            case "POST":
-                postRequest(exchange);
-                break;
+            // case "GET":
+            //     getRequest(exchange);
+            //     break;
+            case "PUT":
+                putRequest(exchange);
             default:
                 String invalidVerb = "HTTP Verb not supported";
 
@@ -40,13 +44,29 @@ public class Login implements HttpHandler {
         }
     }
 
+    // /* 
+    //  *
+    //  * Successful 
+    //  * 
+    // */
+    // // Viewing all the tickets
+    // public void getRequest(HttpExchange exchange) throws IOException {
+    //     String jsonCurrentList = service.getAllTickets();
+
+    //     exchange.sendResponseHeaders(200, jsonCurrentList.getBytes().length);
+
+    //     OutputStream os = exchange.getResponseBody();
+    //     os.write(jsonCurrentList.getBytes());
+    //     os.close();
+    // }
+
     /* 
      *
-     * Successful login
+     * Able to filter the status, but not the email part yet 
      * 
     */
-    // Login
-    public void postRequest(HttpExchange exchange) throws IOException {
+    // Filtering out the tickets by their current status
+    public void putRequest(HttpExchange exchange) throws IOException {
         // InputStream is not a String; it has a bunch of bytes
         // Retrieving a body request
         InputStream is = exchange.getRequestBody();
@@ -64,21 +84,24 @@ public class Login implements HttpHandler {
                 convertToString.append((char) c);
             }
         }
-        // A message that tells the user that their information is invalid
-        String loginMessage = "Invalid login information. Please enter the correct credentials.";
+        String jsonCurrentList = "";
 
-        // However, if an employee's information was indeed valid
-        if (service.employeeLogin(convertToString.toString()) != true) {
-            // Then change the loginMessage to tell the user they've successfully logged in
-            exchange.sendResponseHeaders(404, loginMessage.getBytes().length);
-        } else {
-            loginMessage = "You've successfully logged in.";
-            exchange.sendResponseHeaders(200, loginMessage.getBytes().length);
+        String status = convertToString.toString().toLowerCase();
+
+        if (status.contains("pending")) {
+            jsonCurrentList = service.pendingTickets();
+            
+        } else if (status.contains("approved")) {
+            jsonCurrentList = service.approvedTickets();
+
+        } else if (status.contains("denied")) {
+            jsonCurrentList = service.deniedTickets();
+
         }
+        exchange.sendResponseHeaders(200, jsonCurrentList.getBytes().length);
 
-        // Using OutputStream to send a response
         OutputStream os = exchange.getResponseBody();
-        os.write(loginMessage.getBytes());
+        os.write(jsonCurrentList.getBytes());
         os.close();
     }
 }
