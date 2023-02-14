@@ -337,19 +337,19 @@ public class Repository {
     */
     public String updateTicketStatus(Tickets ticket) {
         Employee employee = new Employee();
+
+        // if (ticket.getStatus().equals("denied") || ticket.getStatus().equals("approved")) {
+        //     return "You cannot alter the tickets that have been altered.";
+        // }
         
         if (!isManager(employee)) {
             try (Connection con = ConnectionUtil.getConnection()) {
-                PreparedStatement prstmt = con.prepareStatement("UPDATE tickets SET status = ? WHERE ticket_id = ? AND status = 'approved'");
+                PreparedStatement prstmt = con.prepareStatement("UPDATE tickets SET status = ? WHERE ticket_id = ? AND status = 'pending'");
     
                 prstmt.setString(1, ticket.getStatus());
                 prstmt.setInt(2, ticket.getTicketId());
     
                 prstmt.execute();
-
-                // if (ticket.getStatus().equals("denied") || ticket.getStatus().equals("approved")) {
-                //     return "You cannot alter the tickets that have been altered.";
-                // }
             } catch (Exception e) {
                 e.printStackTrace();
             }
